@@ -1,4 +1,6 @@
 .env
+atlas-credential.env
+atlas-credentials.env
 __pycache__/
 *.py[cod]
 .venv/

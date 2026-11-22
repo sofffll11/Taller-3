@@ -8,14 +8,14 @@ Instala las dependencias:
 python -m pip install -r requirements.txt
 ```
 
-Define las variables de entorno en PowerShell antes de ejecutar el proyecto:
+Haz una copia de `.env.example` llamada `.env` y reemplaza los valores de ejemplo con los de MongoDB Atlas:
 
-```powershell
-$env:MONGODB_URI = "mongodb+srv://<usuario>:<contraseña>@<cluster>/"
-$env:MONGODB_DB_NAME = "<nombre_de_base_de_datos>"
+```env
+MONGODB_URI=mongodb+srv://<usuario>:<contraseña>@<cluster>.mongodb.net/
+MONGODB_DB_NAME=<nombre_de_base_de_datos>
 ```
 
-No guardes credenciales en el código ni subas valores reales al repositorio. La URI debe corresponder a un usuario de base de datos de Atlas, y la IP desde la que ejecutas el programa debe estar permitida en la configuración de red de Atlas.
+El módulo carga `.env` automáticamente. No guardes credenciales en el código ni subas `.env` al repositorio; ya está excluido por `.gitignore`. La URI debe corresponder a un usuario de base de datos de Atlas, y la IP desde la que ejecutas el programa debe estar permitida en la configuración de red de Atlas.
 
 ## Uso desde Python
 
