@@ -7,6 +7,10 @@ from pymongo.errors import PyMongoError
 from sistema import guardar_registros
 from validaciones import _validar_registros, solicitarDato
 
+def main():
+    archivos.inicializar_estructura()
+    registros = []
+
 
 def mostrar_menu():
     print("""\nSistema de datos biomédicos""")

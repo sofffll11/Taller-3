@@ -10,15 +10,25 @@ CARPETA_JSON = CARPETA_DATOS / "json"
 ARCHIVO_LOG = CARPETA_DATOS / "log.txt"
 
 
-def registrar_accion(mensaje):
+def inicializar_estructura():
     
-    CARPETA_DATOS.mkdir(parents=True, exist_ok=True)
+    (CARPETA_DATOS / "txt").mkdir(parents=True, exist_ok=True)
+    (CARPETA_DATOS / "csv").mkdir(parents=True, exist_ok=True)
+    CARPETA_JSON.mkdir(parents=True, exist_ok=True)
+
+    ARCHIVO_LOG.touch(exist_ok=True)
+
     logging.basicConfig(
         filename=ARCHIVO_LOG,
         encoding="utf-8",
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(message)s",
     )
+
+
+def registrar_accion(mensaje):
+ 
+    inicializar_estructura()
     logging.info(mensaje)
 
 
