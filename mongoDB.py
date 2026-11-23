@@ -187,4 +187,104 @@ def comprobar_conexion() -> None:
 
 
 
+COLECCION = "signos_vitales"
+ARCHIVO_RESULTADOS = (
+    Path(__file__).resolve().parent / "data" / "resultados_mongo.json"
+)
+
+
+def obtener_coleccion(db):
+    """Devuelve la colección del taller."""
+    return db[COLECCION]
+
+
+def insertar_registros(coleccion, registros):
+    """Inserta registros o actualiza los que ya tienen el mismo ID."""
+    from pymongo import UpdateOne
+    from validaciones import _validar_registros
+
+    registros = _validar_registros(registros)
+
+    if not registros:
+        return 0
+
+    operaciones = [
+        UpdateOne(
+            {"id": registro["id"]},
+            {"$set": registro},
+            upsert=True,
+        )
+        for registro in registros
+    ]
+
+    resultado = coleccion.bulk_write(operaciones, ordered=False)
+
+    return resultado.upserted_count + resultado.modified_count
+
+
+def consultar_por_id(coleccion, identificacion):
+    """Busca un registro por su ID."""
+    return coleccion.find_one(
+        {"id": identificacion},
+        {"_id": 0},
+    )
+
+
+def exportar_resultados(coleccion):
+    """Calcula el promedio de FC y obtiene registros con SpO2 menor a 94."""
+    pipeline_promedio = [
+        {
+            "$project": {
+                "fc_num": {
+                    "$toInt": {
+                        "$substrBytes": ["$fc", 0, 3]
+                    }
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": None,
+                "promedio": {"$avg": "$fc_num"},
+            }
+        },
+    ]
+
+    resultado_promedio = list(coleccion.aggregate(pipeline_promedio))
+
+    if resultado_promedio:
+        promedio = resultado_promedio[0]["promedio"]
+    else:
+        promedio = None
+
+    registros_spo2_bajo = list(
+        coleccion.find(
+            {
+                "$expr": {
+                    "$lt": [
+                        {
+                            "$toInt": {
+                                "$substrBytes": ["$spo2", 0, 2]
+                            }
+                        },
+                        94,
+                    ]
+                }
+            },
+            {"_id": 0},
+        )
+    )
+
+    resultados = {
+        "promedio_frecuencia_cardiaca_ppm": promedio,
+        "spo2_menor_a_94": registros_spo2_bajo,
+    }
+
+    ARCHIVO_RESULTADOS.parent.mkdir(parents=True, exist_ok=True)
+
+    with ARCHIVO_RESULTADOS.open("w", encoding="utf-8") as archivo:
+        json.dump(resultados, archivo, ensure_ascii=False, indent=2)
+
+    return ARCHIVO_RESULTADOS, resultados
+
 

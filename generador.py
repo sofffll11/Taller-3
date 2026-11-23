@@ -1,6 +1,5 @@
 import random
 
-
 def generar_registros(cantidad=50):
     """Genera registros de ejemplo con el formato solicitado en el taller."""
     if cantidad < 50:
@@ -9,7 +8,7 @@ def generar_registros(cantidad=50):
     return [
         {
             "id": f"ID-{i:03d}",
-            "fr": f"{random.randint(18, 90)} A?os",
+            "fr": f"{random.randint(18, 90)} Años",
             "fc": f"{random.randint(50, 130):03d}ppm",
             "spo2": f"{random.randint(88, 100)}%",
         }

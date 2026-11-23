@@ -5,7 +5,7 @@ PATRONES = {
     "id": re.compile(r"^ID-\d{3}$"),
     "fr": re.compile(r"^\d{2}\sAños$"),
     "fc": re.compile(r"^\d{3}ppm$"),
-    "spo2": re.compile(r"^\d{2}\%$"),
+    "spo2": re.compile(r"^(?:8[8-9]|9\d|100)%$"),
 }
 
 
@@ -36,45 +36,50 @@ def solicitarDato(mensaje, tipoDato="texto", valorMinimo=None, valorMaximo=None)
 
         raise ValueError(f"Tipo de dato no soportado: {tipoDato}")
 
-
 def _validar_registros(registros):
-    """Comprueba estructura, presencia y formato de cada campo."""
+    
     if not isinstance(registros, list):
         raise ValueError("Los registros deben estar dentro de una lista.")
 
     registros_validos = []
+
     for numero, registro in enumerate(registros, start=1):
         if not isinstance(registro, dict):
-            raise ValueError(f"El registro {numero} no es un objeto v?lido.")
+            raise ValueError(f"El registro {numero} no es un objeto válido.")
 
-    campos_recibidos = set(registro.keys())
-    campos_esperados = set(CAMPOS)
+        campos_recibidos = set(registro.keys())
+        campos_esperados = set(CAMPOS)
 
-    faltantes = campos_esperados - campos_recibidos
-    adicionales = campos_recibidos - campos_esperados
+        faltantes = campos_esperados - campos_recibidos
+        adicionales = campos_recibidos - campos_esperados
 
-    if faltantes or adicionales:
-        detalles = []
+        if faltantes or adicionales:
+            detalles = []
 
-        if faltantes:
-            detalles.append("faltan: " + ", ".join(sorted(faltantes)))
+            if faltantes:
+                detalles.append("faltan: " + ", ".join(sorted(faltantes)))
 
-        if adicionales:
-            detalles.append("sobran: " + ", ".join(sorted(adicionales)))
+            if adicionales:
+                detalles.append("sobran: " + ", ".join(sorted(adicionales)))
 
-        raise ValueError(
-            f"El registro {numero} debe tener exactamente los campos "
-            f"{', '.join(CAMPOS)}; " + "; ".join(detalles)
-        )
+            raise ValueError(
+                f"El registro {numero} debe tener exactamente los campos "
+                f"{', '.join(CAMPOS)}; " + "; ".join(detalles)
+            )
 
         normalizado = {}
+
         for campo in CAMPOS:
             valor = registro[campo]
+
             if not isinstance(valor, str) or PATRONES[campo].fullmatch(valor) is None:
                 raise ValueError(
-                    f"Registro {numero}: {campo}={valor!r} no cumple el formato esperado."
+                    f"Registro {numero}: {campo}={valor!r} "
+                    "no cumple el formato esperado."
                 )
+
             normalizado[campo] = valor
+
         registros_validos.append(normalizado)
 
     return registros_validos

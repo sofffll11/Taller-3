@@ -1,4 +1,6 @@
+from logging import error
 from pathlib import Path
+from re import error
 
 import archivos
 import mongoDB
@@ -7,9 +9,7 @@ from pymongo.errors import PyMongoError
 from sistema import guardar_registros
 from validaciones import _validar_registros, solicitarDato
 
-def main():
-    archivos.inicializar_estructura()
-    registros = []
+
 
 
 def mostrar_menu():
@@ -44,10 +44,8 @@ def _con_cliente(funcion):
 
 def _mensaje_error(error):
     if isinstance(error, PyMongoError):
-        return (
-            f"Error de MongoDB ({type(error).__name__}). Revisa la URI, la red "
-            "permitida en Atlas, el estado del cl?ster y el acceso DNS/TLS."
-        )
+        codigo = getattr(error, "code", None)
+        return f"Error de MongoDB ({type(error).__name__}, código {codigo}): {error}"
     return str(error)
 
 
@@ -65,7 +63,7 @@ def main():
 
     while True:
         mostrar_menu()
-        opcion = solicitarDato("Seleccione una opcion: ", "int", 0, 8)
+        opcion = solicitarDato("Seleccione una opcion: ", "int", 0, 7)
         try:
             if opcion == 0:
 
@@ -109,9 +107,27 @@ def main():
 
             elif opcion == 6:
 
-                identificacion = solicitarDato("ID a consultar (ej. ID-001): ")
-                documento = _con_cliente(lambda c: mongoDB.consultar_por_id(c, identificacion))
-                print(documento if documento else "No se encontro ese ID.")
+                numero_id = solicitarDato("Número de ID a consultar (ej. 30): ")
+
+                if not numero_id.isdigit() or not 1 <= int(numero_id) <= 999:
+                    raise ValueError("Ingrese un número entre 1 y 999.")
+
+                identificacion = f"ID-{int(numero_id):03d}"
+                documento = _con_cliente(
+                    lambda coleccion: mongoDB.consultar_por_id(coleccion, identificacion)
+                )
+
+                if documento:
+                    print("\n" + "─" * 32)
+                    print("       SIGNOS VITALES")
+                    print("─" * 32)
+                    print(f"ID:                         {documento['id']}")
+                    print(f"Frecuencia cardíaca:        {documento['fc']}")
+                    print(f"Edad:                       {documento['fr']}")
+                    print(f"Saturación de oxígeno:     {documento['spo2']}")
+                    print("─" * 32)
+                else:
+                    print(f"No se encontró el registro {identificacion}.")
                 archivos.registrar_accion(f"Consulta Atlas por ID {identificacion}")
 
             elif opcion == 7:

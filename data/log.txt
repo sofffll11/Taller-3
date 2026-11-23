@@ -1,0 +1,68 @@
+2026-11-23 15:25:09,131 INFO Fallo la comprobacion inicial de Atlas: RuntimeError
+2026-11-23 15:26:02,205 INFO Generacion de 50 registros
+2026-11-23 15:26:31,566 INFO Operacion 2 fallida: ValueError: Registro 1: fr='69 A?os' no cumple el formato esperado.
+2026-11-23 15:27:57,733 INFO Fallo la comprobacion inicial de Atlas: RuntimeError
+2026-11-23 15:28:00,897 INFO Generacion de 50 registros
+2026-11-23 15:28:10,857 INFO Operacion 2 fallida: ValueError: Registro 1: spo2='100%' no cumple el formato esperado.
+2026-11-23 15:28:37,401 INFO Operacion 3 fallida: ValueError: Registro 31: spo2='100%' no cumple el formato esperado.
+2026-11-23 15:28:50,256 INFO Operacion 4 fallida: ValueError: Registro 1: spo2='100%' no cumple el formato esperado.
+2026-11-23 15:29:02,421 INFO Operacion 5 fallida: ValueError: Registro 1: spo2='100%' no cumple el formato esperado.
+2026-11-23 15:29:38,125 INFO Fallo la comprobacion inicial de Atlas: RuntimeError
+2026-11-23 15:29:44,993 INFO Generacion de 50 registros
+2026-11-23 15:30:00,410 INFO Operacion 2 fallida: ValueError: Registro 2: spo2='100%' no cumple el formato esperado.
+2026-11-23 15:36:56,868 INFO Fallo la comprobacion inicial de Atlas: RuntimeError
+2026-11-23 15:38:23,976 INFO Fallo la comprobacion inicial de Atlas: RuntimeError
+2026-11-23 15:38:33,656 INFO Generacion de 50 registros
+2026-11-23 15:38:52,874 INFO Operacion 2 fallida: ValueError: Registro 1: spo2=re.compile('^(?:8[8-9]|9\\d|100)%$') no cumple el formato esperado.
+2026-11-23 15:48:29,554 INFO Fallo la comprobacion inicial de Atlas: RuntimeError
+2026-11-23 15:48:33,210 INFO Generacion de 50 registros
+2026-11-23 15:48:34,712 INFO Exportaci?n JSON: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\json\registros.json
+2026-11-23 15:48:34,713 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\csv\registros.csv
+2026-11-23 15:48:34,715 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\txt\registros.txt
+2026-11-23 15:48:52,543 INFO Importaci?n tabular: 50 registros <- C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\csv\registros.csv
+2026-11-23 15:49:01,461 INFO Validacion correcta de 50 registros
+2026-11-23 15:49:13,076 INFO Operacion 5 fallida: RuntimeError: No se encontró MONGODB_URI en atlas-credentials.env. Verifica que el archivo esté junto a mongoDB.py y que la línea tenga el formato MONGODB_URI=mongodb+srv://...
+2026-11-23 15:50:21,071 INFO Operacion 6 fallida: RuntimeError: No se encontró MONGODB_URI en atlas-credentials.env. Verifica que el archivo esté junto a mongoDB.py y que la línea tenga el formato MONGODB_URI=mongodb+srv://...
+2026-11-23 15:50:31,171 INFO Operacion 7 fallida: RuntimeError: No se encontró MONGODB_URI en atlas-credentials.env. Verifica que el archivo esté junto a mongoDB.py y que la línea tenga el formato MONGODB_URI=mongodb+srv://...
+2026-11-23 15:56:12,904 INFO Fallo la comprobacion inicial de Atlas: RuntimeError
+2026-11-23 16:03:23,232 INFO Fallo la comprobacion inicial de Atlas: OperationFailure
+2026-11-23 16:06:13,405 INFO Fallo la comprobacion inicial de Atlas: OperationFailure
+2026-11-23 16:12:57,144 INFO Fallo la comprobacion inicial de Atlas: OperationFailure
+2026-11-23 16:13:45,879 INFO Generacion de 50 registros
+2026-11-23 16:13:47,458 INFO Exportaci?n JSON: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\json\registros.json
+2026-11-23 16:13:47,460 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\csv\registros.csv
+2026-11-23 16:13:47,461 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\txt\registros.txt
+2026-11-23 16:13:50,267 INFO Operacion 5 fallida: OperationFailure: OperationFailure
+2026-11-23 16:15:19,791 INFO Fallo la comprobacion inicial de Atlas: OperationFailure
+2026-11-23 16:16:00,554 INFO Generacion de 50 registros
+2026-11-23 16:16:03,064 INFO Exportaci?n JSON: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\json\registros.json
+2026-11-23 16:16:03,066 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\csv\registros.csv
+2026-11-23 16:16:03,067 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\txt\registros.txt
+2026-11-23 16:16:09,350 INFO Operacion 5 fallida: OperationFailure: OperationFailure
+2026-11-23 16:24:04,020 INFO Operacion 6 fallida: OperationFailure: OperationFailure
+2026-11-23 16:24:14,005 INFO Operacion 7 fallida: OperationFailure: OperationFailure
+2026-11-23 16:27:05,977 INFO Fallo la comprobacion inicial de Atlas: OperationFailure
+2026-11-23 16:27:37,117 INFO Generacion de 50 registros
+2026-11-23 16:27:38,904 INFO Exportaci?n JSON: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\json\registros.json
+2026-11-23 16:27:38,909 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\csv\registros.csv
+2026-11-23 16:27:38,912 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\txt\registros.txt
+2026-11-23 16:27:42,690 INFO Operacion 5 fallida: OperationFailure: OperationFailure
+2026-11-23 16:32:49,314 INFO Fallo la comprobacion inicial de Atlas: OperationFailure
+2026-11-23 16:33:53,710 INFO Comprobaci?n inicial de MongoDB Atlas correcta
+2026-11-23 16:34:01,061 INFO Generacion de 50 registros
+2026-11-23 16:34:01,883 INFO Exportaci?n JSON: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\json\registros.json
+2026-11-23 16:34:01,888 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\csv\registros.csv
+2026-11-23 16:34:01,892 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\txt\registros.txt
+2026-11-23 16:34:05,910 INFO Importaci?n tabular: 50 registros <- C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\txt\registros.txt
+2026-11-23 16:34:11,020 INFO Validacion correcta de 50 registros
+2026-11-23 16:34:20,989 INFO Upsert de 50 registros en Atlas
+2026-11-23 16:35:43,375 INFO Consulta Atlas por ID 030
+2026-11-23 16:36:06,988 INFO Consulta Atlas por ID ID-030
+2026-11-23 16:36:19,316 INFO Consultas Atlas exportadas a C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\resultados_mongo.json
+2026-11-23 16:49:05,838 INFO Comprobaci?n inicial de MongoDB Atlas correcta
+2026-11-23 16:49:09,931 INFO Generacion de 50 registros
+2026-11-23 16:49:13,733 INFO Importaci?n tabular: 50 registros <- C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\csv\registros.csv
+2026-11-23 16:49:14,310 INFO Exportaci?n JSON: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\json\registros.json
+2026-11-23 16:49:14,315 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\csv\registros.csv
+2026-11-23 16:49:14,318 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\txt\registros.txt
+2026-11-23 16:49:38,841 INFO Consulta Atlas por ID ID-031
