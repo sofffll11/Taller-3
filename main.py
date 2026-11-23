@@ -17,7 +17,6 @@ def mostrar_menu():
     print("5. Insertar registros validados en MongoDB Atlas")
     print("6. Consultar un registro por ID")
     print("7. Consultas de frecuencia y SpO2; exportar resultados")
-    print("8. Ingresar un registro manualmente")
     print("0. Salir\n")
 
 
@@ -37,20 +36,6 @@ def _con_cliente(funcion):
         cliente.close()
 
 
-def _ingresar_registro(registros):
-    registro = {
-        "id": solicitarDato("ID (ej. ID-001): "),
-        "fr": solicitarDato("Edad con formato '18 A?os': "),
-        "fc": solicitarDato("Frecuencia con formato '090ppm': "),
-        "spo2": solicitarDato("Saturaci?n con formato '95%': "),
-    }
-    nuevos = _validar_registros([registro])
-    if any(actual["id"] == registro["id"] for actual in registros):
-        raise ValueError(f"El ID {registro['id']} ya existe en los registros actuales.")
-    registros.extend(nuevos)
-    registros[:] = ordenar_por_fc(registros)
-    archivos.registrar_accion(f"Ingreso manual de registro {registro['id']}")
-    print("Registro v?lido agregado.")
 
 
 def _mensaje_error(error):
@@ -64,7 +49,7 @@ def _mensaje_error(error):
 
 def main():
     registros = []
-    # Conserva la comprobaci?n de Atlas al inicio, pero un fallo no bloquea el men? local.
+    
     try:
         mongoDB.comprobar_conexion()
         print("Conexi?n con MongoDB Atlas correcta.")
@@ -72,11 +57,11 @@ def main():
     except (RuntimeError, PyMongoError, OSError) as error:
         print(f"Atlas no est? disponible ahora: {_mensaje_error(error)}")
         print("Puedes continuar usando las funciones locales del programa.")
-        archivos.registrar_accion(f"Fall? la comprobaci?n inicial de Atlas: {type(error).__name__}")
+        archivos.registrar_accion(f"Fallo la comprobacion inicial de Atlas: {type(error).__name__}")
 
     while True:
         mostrar_menu()
-        opcion = solicitarDato("Seleccione una opci?n: ", "int", 0, 8)
+        opcion = solicitarDato("Seleccione una opcion: ", "int", 0, 8)
         try:
             if opcion == 0:
 
@@ -86,7 +71,7 @@ def main():
 
                 registros = ordenar_por_fc(generar_registros())
                 print(f"Se generaron y ordenaron {len(registros)} registros.")
-                archivos.registrar_accion(f"Generaci?n de {len(registros)} registros")
+                archivos.registrar_accion(f"Generacion de {len(registros)} registros")
             elif opcion == 2:
 
                 if _requiere_registros(registros):
@@ -98,17 +83,17 @@ def main():
 
             elif opcion == 3:
 
-                formato = solicitarDato("Formato: 1 JSON, 2 CSV, 3 TXT: ", "int", 1, 3)
+                formato = solicitarDato("Formato: \n1) JSON, \n2) CSV, \n3) TXT \n", "int", 1, 3)
                 importar = {1: archivos.importar_json, 2: archivos.importar_csv, 3: archivos.importar_txt}[formato]
                 registros = ordenar_por_fc(importar())
-                print(f"Se importaron {len(registros)} registros v?lidos.")
+                print(f"Se importaron {len(registros)} registros válidos.")
 
             elif opcion == 4:
 
                 if _requiere_registros(registros):
                     registros = _validar_registros(registros)
-                    print(f"Validaci?n correcta: {len(registros)} registros.")
-                    archivos.registrar_accion(f"Validaci?n correcta de {len(registros)} registros")
+                    print(f"Validacion correcta: {len(registros)} registros.")
+                    archivos.registrar_accion(f"Validacion correcta de {len(registros)} registros")
 
             elif opcion == 5:
 
@@ -116,13 +101,13 @@ def main():
                     registros = _validar_registros(registros)
                     cantidad = _con_cliente(lambda c: mongoDB.insertar_registros(c, registros))
                     archivos.registrar_accion(f"Upsert de {cantidad} registros en Atlas")
-                    print(f"Se guardaron {cantidad} registros en la colecci?n '{mongoDB.COLECCION}'.")
+                    print(f"Se guardaron {cantidad} registros en la coleccion '{mongoDB.COLECCION}'.")
 
             elif opcion == 6:
 
                 identificacion = solicitarDato("ID a consultar (ej. ID-001): ")
                 documento = _con_cliente(lambda c: mongoDB.consultar_por_id(c, identificacion))
-                print(documento if documento else "No se encontr? ese ID.")
+                print(documento if documento else "No se encontro ese ID.")
                 archivos.registrar_accion(f"Consulta Atlas por ID {identificacion}")
 
             elif opcion == 7:
@@ -133,14 +118,12 @@ def main():
                 print(f"Resultados exportados a {ruta}")
                 archivos.registrar_accion(f"Consultas Atlas exportadas a {ruta}")
 
-            elif opcion == 8:
-
-                _ingresar_registro(registros)
+        
                 
         except (ValueError, OSError, PyMongoError, RuntimeError) as error:
-            print(f"No se pudo completar la operaci?n: {_mensaje_error(error)}")
+            print(f"No se pudo completar la operacion: {_mensaje_error(error)}")
             detalle = type(error).__name__ if isinstance(error, PyMongoError) else str(error)
-            archivos.registrar_accion(f"Operaci?n {opcion} fallida: {type(error).__name__}: {detalle}")
+            archivos.registrar_accion(f"Operacion {opcion} fallida: {type(error).__name__}: {detalle}")
 
 
 if __name__ == "__main__":

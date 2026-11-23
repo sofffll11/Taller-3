@@ -11,7 +11,7 @@ ARCHIVO_LOG = CARPETA_DATOS / "log.txt"
 
 
 def registrar_accion(mensaje):
-    """Registra una acci?n en data/log.txt."""
+    
     CARPETA_DATOS.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
         filename=ARCHIVO_LOG,
