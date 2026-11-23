@@ -1,3 +1,6 @@
+CAMPOS = ("id", "fr", "fc", "spo2")
+
+
 def solicitarDato(mensaje, tipoDato, valorMinimo=None, valorMaximo=None):
     while True:
 
@@ -42,6 +45,31 @@ def solicitarDato(mensaje, tipoDato, valorMinimo=None, valorMaximo=None):
                 pass
 
             return entrada
+
+def _validar_registros(registros):
+    """Comprueba que cada elemento tenga los campos esperados."""
+    if not isinstance(registros, list):
+        raise ValueError("El archivo debe contener una lista de registros.")
+
+    registros_validos = []
+
+    for numero, registro in enumerate(registros, start=1):
+        if not isinstance(registro, dict):
+            raise ValueError(f"El registro {numero} no es un objeto válido.")
+
+        faltantes = [campo for campo in CAMPOS if campo not in registro]
+        if faltantes:
+            raise ValueError(
+                f"Al registro {numero} le faltan estos campos: "
+                + ", ".join(faltantes)
+            )
+
+        registros_validos.append({
+            campo: registro[campo]
+            for campo in CAMPOS
+        })
+
+    return registros_validos
 
         
 
