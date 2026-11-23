@@ -31,9 +31,7 @@ def cargar_credenciales() -> None:
         if clave:
             os.environ.setdefault(clave, valor)
 
-
 cargar_credenciales()
-
 
 def crear_cliente() -> MongoClient:
     """Crea un cliente Atlas usando MONGODB_URI."""
@@ -83,7 +81,5 @@ def comprobar_conexion() -> None:
         cliente.close()
 
 
-if __name__ == "__main__":
-    comprobar_conexion()
 
 

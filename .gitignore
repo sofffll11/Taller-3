@@ -1,4 +1,6 @@
 .env
+.env.*
+!.env.example
 atlas-credential.env
 atlas-credentials.env
 __pycache__/

@@ -1,61 +1,51 @@
+import re
+
 CAMPOS = ("id", "fr", "fc", "spo2")
+PATRONES = {
+    "id": re.compile(r"ID-\d{3}"),
+    "fr": re.compile(r"(?:1[89]|[2-8]\d|90) A?os"),
+    "fc": re.compile(r"(?:0(?:5\d|[6-9]\d)|1[0-2]\d|130)ppm"),
+    "spo2": re.compile(r"(?:8[89]|9\d|100)%"),
+}
 
 
-def solicitarDato(mensaje, tipoDato, valorMinimo=None, valorMaximo=None):
+def solicitarDato(mensaje, tipoDato="texto", valorMinimo=None, valorMaximo=None):
+    """Solicita un dato simple y vuelve a preguntar si no cumple el tipo."""
     while True:
-
         entrada = input(mensaje).strip()
-
-        if entrada == "":
-
-            print("Error: No se puede dejar el campo vacío. Por favor, ingrese un valor.")
+        if not entrada:
+            print("Error: el campo no puede quedar vac?o.")
             continue
 
         if tipoDato == "int":
-
             try:
-
                 valor = int(entrada)
-
-                if valorMinimo is not None and valor < valorMinimo:
-
-                    print(f"Error: El valor ingresado debe ser mayor o igual a {valorMinimo}. Por favor, intente nuevamente.")
-                    continue
-
-                if valorMaximo is not None and valor > valorMaximo:
-
-                    print(f"Error: El valor ingresado debe ser menor o igual a {valorMaximo}. Por favor, intente nuevamente.")
-                    continue
-                
-
-                return valor
-
             except ValueError:
-
-                print("Error: Debe ingresar un número entero válido. Por favor, intente nuevamente.")
+                print("Error: ingrese un n?mero entero v?lido.")
                 continue
+            if valorMinimo is not None and valor < valorMinimo:
+                print(f"Error: el valor debe ser mayor o igual a {valorMinimo}.")
+                continue
+            if valorMaximo is not None and valor > valorMaximo:
+                print(f"Error: el valor debe ser menor o igual a {valorMaximo}.")
+                continue
+            return valor
 
-        elif tipoDato == "texto":
-
-            try:
-                float(entrada)
-                print("Error: No se puede ingresar solo números. Por favor, ingrese un texto válido.")
-
-            except ValueError:
-                pass
-
+        if tipoDato == "texto":
             return entrada
 
+        raise ValueError(f"Tipo de dato no soportado: {tipoDato}")
+
+
 def _validar_registros(registros):
-    """Comprueba que cada elemento tenga los campos esperados."""
+    """Comprueba estructura, presencia y formato de cada campo."""
     if not isinstance(registros, list):
-        raise ValueError("El archivo debe contener una lista de registros.")
+        raise ValueError("Los registros deben estar dentro de una lista.")
 
     registros_validos = []
-
     for numero, registro in enumerate(registros, start=1):
         if not isinstance(registro, dict):
-            raise ValueError(f"El registro {numero} no es un objeto válido.")
+            raise ValueError(f"El registro {numero} no es un objeto v?lido.")
 
         faltantes = [campo for campo in CAMPOS if campo not in registro]
         if faltantes:
@@ -64,13 +54,14 @@ def _validar_registros(registros):
                 + ", ".join(faltantes)
             )
 
-        registros_validos.append({
-            campo: registro[campo]
-            for campo in CAMPOS
-        })
+        normalizado = {}
+        for campo in CAMPOS:
+            valor = registro[campo]
+            if not isinstance(valor, str) or PATRONES[campo].fullmatch(valor) is None:
+                raise ValueError(
+                    f"Registro {numero}: {campo}={valor!r} no cumple el formato esperado."
+                )
+            normalizado[campo] = valor
+        registros_validos.append(normalizado)
 
     return registros_validos
-
-        
-
-

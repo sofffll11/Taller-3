@@ -1,91 +1,146 @@
-from generador import generar_registros, ordenar_por_fc
-from validaciones import solicitarDato
-from sistema import guardar_registro
+from pathlib import Path
+
 import archivos
+import mongoDB
+from generador import generar_registros, ordenar_por_fc
+from pymongo.errors import PyMongoError
+from sistema import guardar_registros
+from validaciones import _validar_registros, solicitarDato
+
 
 def mostrar_menu():
-    print("""Bienvenidos al sistema de datos biomédicos; seleccione una opción:\n""")
-    print("1. Generar registros aleatorios")
-    print("2. Exportar archivos")
-    print("3. Importar archivos")
-    print("4. Validar registros")
-    print("5. Insertar registros validos en MongoDB")
-    print("6. Consultar por ID")
-    print("7. Realizar consultas y exportar resultados")
-    print("0. Salir")
+    print("""\nSistema de datos biom?dicos
+1. Generar 50 registros aleatorios
+2. Exportar registros a JSON, CSV y TXT
+3. Importar registros
+4. Validar registros actuales
+5. Insertar registros validados en MongoDB Atlas
+6. Consultar un registro por ID
+7. Consultas de frecuencia y SpO2; exportar resultados
+8. Ingresar un registro manualmente
+0. Salir""")
+
+
+def _requiere_registros(registros):
+    if not registros:
+        print("No hay registros disponibles. Genere, importe o ingrese datos primero.")
+        return False
+    return True
+
+
+def _con_cliente(funcion):
+    cliente = mongoDB.crear_cliente()
+    try:
+        db = mongoDB.obtener_base_datos(cliente)
+        return funcion(mongoDB.obtener_coleccion(db))
+    finally:
+        cliente.close()
+
+
+def _ingresar_registro(registros):
+    registro = {
+        "id": solicitarDato("ID (ej. ID-001): "),
+        "fr": solicitarDato("Edad con formato '18 A?os': "),
+        "fc": solicitarDato("Frecuencia con formato '090ppm': "),
+        "spo2": solicitarDato("Saturaci?n con formato '95%': "),
+    }
+    nuevos = _validar_registros([registro])
+    if any(actual["id"] == registro["id"] for actual in registros):
+        raise ValueError(f"El ID {registro['id']} ya existe en los registros actuales.")
+    registros.extend(nuevos)
+    registros[:] = ordenar_por_fc(registros)
+    archivos.registrar_accion(f"Ingreso manual de registro {registro['id']}")
+    print("Registro v?lido agregado.")
+
+
+def _mensaje_error(error):
+    if isinstance(error, PyMongoError):
+        return (
+            f"Error de MongoDB ({type(error).__name__}). Revisa la URI, la red "
+            "permitida en Atlas, el estado del cl?ster y el acceso DNS/TLS."
+        )
+    return str(error)
 
 
 def main():
+    registros = []
+    # Conserva la comprobaci?n de Atlas al inicio, pero un fallo no bloquea el men? local.
+    try:
+        mongoDB.comprobar_conexion()
+        print("Conexi?n con MongoDB Atlas correcta.")
+        archivos.registrar_accion("Comprobaci?n inicial de MongoDB Atlas correcta")
+    except (RuntimeError, PyMongoError, OSError) as error:
+        print(f"Atlas no est? disponible ahora: {_mensaje_error(error)}")
+        print("Puedes continuar usando las funciones locales del programa.")
+        archivos.registrar_accion(f"Fall? la comprobaci?n inicial de Atlas: {type(error).__name__}")
 
-    registros: list[dict[str, str]] = []    
-    
     while True:
         mostrar_menu()
-        
-        # Validación de la opción ingresada
-        opcion = solicitarDato("\nIngrese el número de la opción deseada: ", "int", 0, 7)
+        opcion = solicitarDato("Seleccione una opci?n: ", "int", 0, 8)
+        try:
+            if opcion == 0:
 
-        # Guardar registros y salir del programa
-        if opcion == 0:
+                print("Hasta luego.")
+                break
+            if opcion == 1:
 
-            for registro in registros:
-                guardar_registro(registro)
-            print("Saliendo del programa. ¡Hasta luego!")
-            break
+                registros = ordenar_por_fc(generar_registros())
+                print(f"Se generaron y ordenaron {len(registros)} registros.")
+                archivos.registrar_accion(f"Generaci?n de {len(registros)} registros")
+            elif opcion == 2:
 
-        # Generar registros aleatorios
-        if opcion == 1:
+                if _requiere_registros(registros):
+                    registros = ordenar_por_fc(_validar_registros(registros))
+                    rutas = guardar_registros(registros)
+                    print("Archivos exportados:")
+                    for ruta in rutas:
+                        print(f"- {ruta}")
 
-        
-            registros = generar_registros()
-            print(f"\n{len(registros)} registros generados exitosamente.")
+            elif opcion == 3:
 
-        # Exportar archivos
-        elif opcion == 2:
+                formato = solicitarDato("Formato: 1 JSON, 2 CSV, 3 TXT: ", "int", 1, 3)
+                importar = {1: archivos.importar_json, 2: archivos.importar_csv, 3: archivos.importar_txt}[formato]
+                registros = ordenar_por_fc(importar())
+                print(f"Se importaron {len(registros)} registros v?lidos.")
 
-            if 'registros' not in locals():
-                print("\nNo hay registros generados. Por favor, genere registros primero.")
-                continue
+            elif opcion == 4:
 
-            for registro in registros:
-                guardar_registro(registro)
-            print("Registros exportados exitosamente.")
+                if _requiere_registros(registros):
+                    registros = _validar_registros(registros)
+                    print(f"Validaci?n correcta: {len(registros)} registros.")
+                    archivos.registrar_accion(f"Validaci?n correcta de {len(registros)} registros")
 
-        # Importar archivos
-        elif opcion == 3:
+            elif opcion == 5:
 
-            print("\nSeleccione el formato de archivo a importar: \n")
-            print("1. JSON")
-            print("2. CSV")
-            print("3. TXT\n")
+                if _requiere_registros(registros):
+                    registros = _validar_registros(registros)
+                    cantidad = _con_cliente(lambda c: mongoDB.insertar_registros(c, registros))
+                    archivos.registrar_accion(f"Upsert de {cantidad} registros en Atlas")
+                    print(f"Se guardaron {cantidad} registros en la colecci?n '{mongoDB.COLECCION}'.")
 
-            formato = solicitarDato("Ingrese el número del formato deseado: ", "int", 1, 3)
+            elif opcion == 6:
 
-            if formato == 1:
-                registros = archivos.importar_json()
-                print(f"\n{len(registros)} registros importados desde JSON.")
+                identificacion = solicitarDato("ID a consultar (ej. ID-001): ")
+                documento = _con_cliente(lambda c: mongoDB.consultar_por_id(c, identificacion))
+                print(documento if documento else "No se encontr? ese ID.")
+                archivos.registrar_accion(f"Consulta Atlas por ID {identificacion}")
 
-            elif formato == 2:
-                registros = archivos.importar_csv()
-                print(f"\n{len(registros)} registros importados desde CSV.")
+            elif opcion == 7:
 
-            elif formato == 3:
-                registros = archivos.importar_txt()
-                print(f"\n{len(registros)} registros importados desde TXT.")
+                ruta, resultados = _con_cliente(mongoDB.exportar_resultados)
+                print(f"Promedio FC: {resultados['promedio_frecuencia_cardiaca_ppm']}")
+                print(f"Registros con SpO2 menor a 94: {len(resultados['spo2_menor_a_94'])}")
+                print(f"Resultados exportados a {ruta}")
+                archivos.registrar_accion(f"Consultas Atlas exportadas a {ruta}")
 
-        # Validar registros
-        elif opcion == 4:
-            if 'registros' not in locals():
-                print("\nNo hay registros generados o importados. Por favor, genere o importe registros primero.")
-                continue
+            elif opcion == 8:
 
-            try:
-                registros = archivos._validar_registros(registros)
-                print("\nTodos los registros son válidos.")
-            except ValueError as e:
-                print(f"\nError de validación: {e}")
-
-            
+                _ingresar_registro(registros)
+                
+        except (ValueError, OSError, PyMongoError, RuntimeError) as error:
+            print(f"No se pudo completar la operaci?n: {_mensaje_error(error)}")
+            detalle = type(error).__name__ if isinstance(error, PyMongoError) else str(error)
+            archivos.registrar_accion(f"Operaci?n {opcion} fallida: {type(error).__name__}: {detalle}")
 
 
 if __name__ == "__main__":
