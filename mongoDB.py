@@ -1,17 +1,18 @@
-"""Conexión de prueba y acceso a la base de datos de MongoDB Atlas."""
-
+import json
 import os
 from pathlib import Path
 
-from pymongo import MongoClient
+from pymongo import MongoClient, UpdateOne
 from pymongo.database import Database
 from pymongo.errors import ServerSelectionTimeoutError
 
 
 CARPETA_PROYECTO = Path(__file__).resolve().parent
-ARCHIVO_CREDENCIALES = CARPETA_PROYECTO / "atlas-credential.env"
+ARCHIVO_CREDENCIALES = CARPETA_PROYECTO / "atlxas-credential.env"
 if not ARCHIVO_CREDENCIALES.is_file():
     ARCHIVO_CREDENCIALES = CARPETA_PROYECTO / "atlas-credentials.env"
+
+COLECCION = "signos_vitales"
 
 def cargar_credenciales() -> None:
     """Lee KEY=VALUE del archivo sin requerir paquetes externos adicionales."""
@@ -62,6 +63,110 @@ def obtener_base_datos(cliente: MongoClient) -> Database:
         )
     return cliente[nombre]
 
+def obtener_coleccion(db):
+    """Devuelve la colección de signos vitales."""
+    return db[COLECCION]
+
+
+def insertar_registros(coleccion, registros):
+    """Inserta o actualiza los registros usando su ID como clave."""
+    if not registros:
+        return 0
+
+    operaciones = [
+        UpdateOne(
+            {"id": registro["id"]},
+            {"$set": registro},
+            upsert=True,
+        )
+        for registro in registros
+    ]
+
+    resultado = coleccion.bulk_write(operaciones, ordered=False)
+    return resultado.upserted_count + resultado.modified_count
+
+
+def consultar_por_id(coleccion, identificacion):
+    """Busca un registro por su ID y oculta el identificador interno de MongoDB."""
+    return coleccion.find_one(
+        {"id": identificacion},
+        {"_id": 0},
+    )
+
+
+def exportar_resultados(coleccion):
+    """Calcula el promedio de FC, consulta SpO2 < 94 y guarda el resultado JSON."""
+    pipeline = [
+        {
+            "$group": {
+                "_id": None,
+                "promedio": {
+                    "$avg": {
+                        "$convert": {
+                            "input": {
+                                "$replaceOne": {
+                                    "input": "$fc",
+                                    "find": "ppm",
+                                    "replacement": "",
+                                }
+                            },
+                            "to": "double",
+                            "onError": None,
+                            "onNull": None,
+                        }
+                    }
+                },
+            }
+        }
+    ]
+
+    promedio_resultado = list(coleccion.aggregate(pipeline))
+    promedio = (
+        promedio_resultado[0]["promedio"]
+        if promedio_resultado
+        else None
+    )
+
+    documentos_bajos = list(
+        coleccion.find(
+            {
+                "$expr": {
+                    "$lt": [
+                        {
+                            "$convert": {
+                                "input": {
+                                    "$replaceOne": {
+                                        "input": "$spo2",
+                                        "find": "%",
+                                        "replacement": "",
+                                    }
+                                },
+                                "to": "int",
+                                "onError": 1000,
+                                "onNull": 1000,
+                            }
+                        },
+                        94,
+                    ]
+                }
+            },
+            {"_id": 0},
+        )
+    )
+
+    resultados = {
+        "promedio_frecuencia_cardiaca_ppm": promedio,
+        "spo2_menor_a_94": documentos_bajos,
+    }
+
+    carpeta_resultados = CARPETA_PROYECTO / "data"
+    carpeta_resultados.mkdir(parents=True, exist_ok=True)
+    ruta = carpeta_resultados / "resultados_mongo.json"
+
+    with ruta.open("w", encoding="utf-8") as archivo:
+        json.dump(resultados, archivo, ensure_ascii=False, indent=4)
+
+    return ruta, resultados
 
 def comprobar_conexion() -> None:
     """Hace ping a Atlas y cierra el cliente incluso si la conexión falla."""
