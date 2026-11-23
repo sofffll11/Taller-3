@@ -66,3 +66,6 @@
 2026-11-23 16:49:14,315 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\csv\registros.csv
 2026-11-23 16:49:14,318 INFO Exportaci?n tabular: 50 registros -> C:\Users\sofia\OneDrive\Escritorio\Taller signos\Taller-3\data\txt\registros.txt
 2026-11-23 16:49:38,841 INFO Consulta Atlas por ID ID-031
+2026-11-23 16:54:24,665 INFO Fallo la comprobacion inicial de Atlas: RuntimeError
+2026-11-23 17:04:10,826 INFO Comprobaci?n inicial de MongoDB Atlas correcta
+2026-11-23 17:04:22,642 INFO Consulta Atlas por ID ID-030
