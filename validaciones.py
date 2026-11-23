@@ -2,10 +2,10 @@ import re
 
 CAMPOS = ("id", "fr", "fc", "spo2")
 PATRONES = {
-    "id": re.compile(r"ID-\d{3}"),
-    "fr": re.compile(r"(?:1[89]|[2-8]\d|90) A?os"),
-    "fc": re.compile(r"(?:0(?:5\d|[6-9]\d)|1[0-2]\d|130)ppm"),
-    "spo2": re.compile(r"(?:8[89]|9\d|100)%"),
+    "id": re.compile(r"^ID-\d{3}$"),
+    "fr": re.compile(r"^\d{2}\sAños$"),
+    "fc": re.compile(r"^\d{3}ppm$"),
+    "spo2": re.compile(r"^\d{2}\%$"),
 }
 
 
@@ -47,12 +47,25 @@ def _validar_registros(registros):
         if not isinstance(registro, dict):
             raise ValueError(f"El registro {numero} no es un objeto v?lido.")
 
-        faltantes = [campo for campo in CAMPOS if campo not in registro]
+    campos_recibidos = set(registro.keys())
+    campos_esperados = set(CAMPOS)
+
+    faltantes = campos_esperados - campos_recibidos
+    adicionales = campos_recibidos - campos_esperados
+
+    if faltantes or adicionales:
+        detalles = []
+
         if faltantes:
-            raise ValueError(
-                f"Al registro {numero} le faltan estos campos: "
-                + ", ".join(faltantes)
-            )
+            detalles.append("faltan: " + ", ".join(sorted(faltantes)))
+
+        if adicionales:
+            detalles.append("sobran: " + ", ".join(sorted(adicionales)))
+
+        raise ValueError(
+            f"El registro {numero} debe tener exactamente los campos "
+            f"{', '.join(CAMPOS)}; " + "; ".join(detalles)
+        )
 
         normalizado = {}
         for campo in CAMPOS:
