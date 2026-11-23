@@ -9,16 +9,16 @@ from validaciones import _validar_registros, solicitarDato
 
 
 def mostrar_menu():
-    print("""\nSistema de datos biom?dicos
-1. Generar 50 registros aleatorios
-2. Exportar registros a JSON, CSV y TXT
-3. Importar registros
-4. Validar registros actuales
-5. Insertar registros validados en MongoDB Atlas
-6. Consultar un registro por ID
-7. Consultas de frecuencia y SpO2; exportar resultados
-8. Ingresar un registro manualmente
-0. Salir""")
+    print("""\nSistema de datos biomédicos""")
+    print("1. Generar 50 registros aleatorios")
+    print("2. Exportar registros a JSON, CSV y TXT")
+    print("3. Importar registros")
+    print("4. Validar registros actuales")
+    print("5. Insertar registros validados en MongoDB Atlas")
+    print("6. Consultar un registro por ID")
+    print("7. Consultas de frecuencia y SpO2; exportar resultados")
+    print("8. Ingresar un registro manualmente")
+    print("0. Salir\n")
 
 
 def _requiere_registros(registros):
